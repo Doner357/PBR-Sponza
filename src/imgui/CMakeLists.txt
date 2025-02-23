@@ -1,5 +1,5 @@
 # Simple CMakeLists for imgui
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.18)
 
 add_library(
     imgui OBJECT

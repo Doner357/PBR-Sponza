@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.18)
 
 project(OpenGL_Course_Project VERSION 1.0.0)
 
@@ -80,11 +80,18 @@ target_include_directories(
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 
-target_link_directories(
-    ${CMAKE_PROJECT_NAME}
-    PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/assimp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw"
+find_library(
+    ASSIMP_LIB
+    NAMES libassimp.dll assimp.dll
+    HINTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/assimp"
+    REQUIRED
+)
+
+find_library(
+    GLFW_LIB
+    NAMES libglfw3 glfw3
+    HINTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw"
+    REQUIRED
 )
 
 target_link_libraries(
@@ -93,12 +100,14 @@ target_link_libraries(
     project_compile_flags
     appended
     imgui
-    glfw3
-    assimp-5.dll
+    ${ASSIMP_LIB}
+    ${GLFW_LIB}
 )
 
 set_target_properties(
     ${CMAKE_PROJECT_NAME}
     PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin"
+    RUNTIME_OUTPUT_DIRECTORY         "${CMAKE_CURRENT_BINARY_DIR}/bin"
+    RUNTIME_OUTPUT_DIRECTORY_Debug   "${CMAKE_CURRENT_BINARY_DIR}/bin/Debug"
+    RUNTIME_OUTPUT_DIRECTORY_Release "${CMAKE_CURRENT_BINARY_DIR}/bin/Release"
 )
