@@ -16,6 +16,7 @@
 *.dylib
 *.dll
 !lib/**
+!assets/**
 
 # Fortran module files
 *.mod
