@@ -1,0 +1,276 @@
+# Blender 4.3.2 MTL File: 'None'
+# www.blender.org
+
+newmtl Material__25.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Lion_Albedo.dds
+map_Ks textures/Dielectric_metallic.dds
+map_Ns textures/Lion_Roughness.dds
+norm textures/Lion_Normal.dds
+
+newmtl Material__298.001
+Ns 10.000005
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Background_Albedo.dds
+map_Ks textures/Dielectric_metallic.dds
+norm textures/Background_Normal.dds
+
+newmtl Material__47.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Metallic_metallic.dds
+map_Ks textures/black.png
+map_Ns textures/Metallic_metallic.dds
+
+newmtl Material__57.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 1
+map_Kd textures/VasePlant_diffuse.dds
+map_Ks textures/Dielectric_metallic.dds
+map_Ns textures/VasePlant_roughness.dds
+map_d textures/VasePlant_mask.dds
+norm textures/VasePlant_normal.dds
+
+newmtl arch.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Arch_diffuse.dds
+map_Ks textures/Dielectric_metallic.dds
+map_Ns textures/Sponza_Arch_roughness.dds
+norm textures/Sponza_Arch_normal.dds
+
+newmtl bricks.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Bricks_a_Albedo.dds
+map_Ks textures/Dielectric_metallic.dds
+map_Ns textures/Sponza_Bricks_a_Roughness.dds
+norm textures/Sponza_Bricks_a_Normal.dds
+
+newmtl ceiling.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Ceiling_diffuse.dds
+map_Ks textures/Dielectric_metallic.dds
+map_Ns textures/Sponza_Ceiling_roughness.dds
+norm textures/Sponza_Ceiling_normal.dds
+
+newmtl chain.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 1
+map_Kd textures/ChainTexture_Albedo.dds
+map_Ks textures/ChainTexture_Metallic.dds
+map_Ns textures/ChainTexture_Roughness.dds
+map_d textures/ChainTexture_mask.dds
+norm textures/ChainTexture_Normal.dds
+
+newmtl column_a.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Column_a_diffuse.dds
+map_Ks textures/Dielectric_metallic.dds
+map_Ns textures/Sponza_Column_a_roughness.dds
+norm textures/Sponza_Column_a_normal.dds
+
+newmtl column_b.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Column_b_diffuse.dds
+map_Ks textures/Dielectric_metallic.dds
+map_Ns textures/Sponza_Column_b_roughness.dds
+norm textures/Sponza_Column_b_normal.dds
+
+newmtl column_c.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Column_c_diffuse.dds
+map_Ks textures/Dielectric_metallic.dds
+map_Ns textures/Sponza_Column_c_roughness.dds
+norm textures/Sponza_Column_c_normal.dds
+
+newmtl details.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Details_diffuse.dds
+map_Ks textures/Sponza_Details_metallic.dds
+map_Ns textures/Sponza_Details_roughness.dds
+norm textures/Sponza_Details_normal.dds
+
+newmtl fabric_a.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Fabric_Red_diffuse.dds
+map_Ks textures/Sponza_Fabric_metallic.dds
+map_Ns textures/Sponza_Fabric_roughness.dds
+norm textures/Sponza_Fabric_Red_normal.dds
+
+newmtl fabric_c.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Curtain_Red_diffuse.dds
+map_Ks textures/Sponza_Curtain_metallic.dds
+map_Ns textures/Sponza_Curtain_roughness.dds
+norm textures/Sponza_Curtain_Red_normal.dds
+
+newmtl fabric_d.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Fabric_Blue_diffuse.dds
+map_Ks textures/Sponza_Fabric_metallic.dds
+map_Ns textures/Sponza_Fabric_roughness.dds
+norm textures/Sponza_Fabric_Blue_normal.dds
+
+newmtl fabric_e.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Fabric_Green_diffuse.dds
+map_Ks textures/Sponza_Fabric_metallic.dds
+map_Ns textures/Sponza_Fabric_roughness.dds
+norm textures/Sponza_Fabric_Green_normal.dds
+
+newmtl fabric_f.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Curtain_Green_diffuse.dds
+map_Ks textures/Sponza_Curtain_metallic.dds
+map_Ns textures/Sponza_Curtain_roughness.dds
+norm textures/Sponza_Curtain_Green_normal.dds
+
+newmtl fabric_g.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Curtain_Blue_diffuse.dds
+map_Ks textures/Sponza_Curtain_metallic.dds
+map_Ns textures/Sponza_Curtain_roughness.dds
+norm textures/Sponza_Curtain_Blue_normal.dds
+
+newmtl flagpole.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_FlagPole_diffuse.dds
+map_Ks textures/Metallic_metallic.dds
+map_Ns textures/Sponza_FlagPole_roughness.dds
+norm textures/Sponza_FlagPole_normal.dds
+
+newmtl floor.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Floor_diffuse.dds
+map_Ks textures/Dielectric_metallic.dds
+map_Ns textures/Sponza_Floor_roughness.dds
+norm textures/Sponza_Floor_normal.dds
+
+newmtl leaf.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+illum 1
+map_Kd textures/Sponza_Thorn_diffuse.dds
+map_Ks textures/Dielectric_metallic.dds
+map_Ns textures/Sponza_Thorn_roughness.dds
+map_d textures/Sponza_Thorn_mask.dds
+norm textures/Sponza_Thorn_normal.dds
+
+newmtl roof.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Sponza_Roof_diffuse.dds
+map_Ks textures/Dielectric_metallic.dds
+map_Ns textures/Sponza_Roof_roughness.dds
+norm textures/Sponza_Roof_normal.dds
+
+newmtl vase.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/Vase_diffuse.dds
+map_Ks textures/Dielectric_metallic.dds
+map_Ns textures/Vase_roughness.dds
+norm textures/Vase_normal.dds
+
+newmtl vase_hanging.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/VaseHanging_diffuse.dds
+map_Ks textures/Metallic_metallic.dds
+map_Ns textures/VaseHanging_roughness.dds
+norm textures/VaseHanging_normal.dds
+
+newmtl vase_round.001
+Ka 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 1
+map_Kd textures/VaseRound_diffuse.dds
+map_Ks textures/Dielectric_metallic.dds
+map_Ns textures/VaseRound_roughness.dds
+norm textures/VaseRound_normal.dds

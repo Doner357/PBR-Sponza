@@ -1,0 +1,7 @@
+Location	Name					Nickname
+----------------------------------------------------------
+0			Position				(aPos)
+1			Normal					(aNorm)
+2			Texture Coordinates		(aTexCoords)
+3           Tangent                 (aTangent)
+4           Bitangent               (aBitangent)

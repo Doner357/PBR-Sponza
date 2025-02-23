@@ -1,0 +1,7 @@
+Library                      version
+--------------------------------------
+GLFW                          3.3.8
+GLAD                          3.3
+glm                           0.9.9.8
+stb_images.h                  N
+assimp                        5.2.5
