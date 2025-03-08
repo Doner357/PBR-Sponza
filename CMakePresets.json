@@ -1,0 +1,38 @@
+{
+    "version": 4,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 15
+    },
+    "configurePresets": [
+        {
+            "name": "default",
+            "displayName": "Default Config",
+            "description": "Default Config for Release config type.",
+            "binaryDir": "${sourceDir}/build/default",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE":"Release"
+            }
+        },
+        {
+            "name": "Release",
+            "displayName": "Release Config",
+            "description": "Release config type.",
+            "binaryDir": "${sourceDir}/build/Release",
+            "inherits": "default" 
+        },
+        {
+            "name": "Debug",
+            "displayName": "Debug Config",
+            "description": "Debug config type.",
+            "binaryDir": "${sourceDir}/build/Debug",
+            "inherits": "default" 
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "default",
+            "configurePreset": "default"
+        }
+    ]
+}

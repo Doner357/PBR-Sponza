@@ -37,6 +37,12 @@ build
 # vscode
 .vscode
 
+# doxygen
+doxygen/generated
+
+# CMake
+CMakeUserPresets.json
+
 # exceptions
 !lib/**
 !assets/**
