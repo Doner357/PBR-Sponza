@@ -12,6 +12,12 @@ add_library(
     imgui.cpp
 )
 
+target_compile_options(
+    imgui
+    PRIVATE
+    $<$<AND:${gcc_like_cxx},$<CONFIG:Release>>:-O3>
+)
+
 target_link_libraries(
     imgui
     PRIVATE

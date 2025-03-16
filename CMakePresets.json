@@ -6,30 +6,40 @@
     },
     "configurePresets": [
         {
-            "name": "default",
-            "displayName": "Default Config",
-            "description": "Default Config for Release config type.",
-            "binaryDir": "${sourceDir}/build/default",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE":"Release"
-            }
-        },
-        {
             "name": "Release",
             "displayName": "Release Config",
             "description": "Release config type.",
             "binaryDir": "${sourceDir}/build/Release",
-            "inherits": "default" 
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE":"Release"
+            }
         },
         {
             "name": "Debug",
             "displayName": "Debug Config",
             "description": "Debug config type.",
             "binaryDir": "${sourceDir}/build/Debug",
-            "inherits": "default" 
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE":"Debug"
+            }
+        },
+        {
+            "name": "default",
+            "displayName": "Default Config",
+            "description": "Default Config for Release config type.",
+            "binaryDir": "${sourceDir}/build/default",
+            "inherits": "Release"
         }
     ],
     "buildPresets": [
+        {
+            "name": "release",
+            "configurePreset": "default"
+        },
+        {
+            "name": "debug",
+            "configurePreset": "default"
+        },
         {
             "name": "default",
             "configurePreset": "default"

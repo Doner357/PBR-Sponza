@@ -41,7 +41,7 @@ const unsigned int SCR_HEIGHT = 1440;
 
 // Gamma value
 // This time we do gamma correction in screen post-processing shader
-float gamma = 2.2f;
+float view_gamma = 2.2f;
 
 // Camera
 Camera camera(glm::vec3(0.0f, 1.0f, 3.0f));
@@ -164,10 +164,10 @@ float ssr_stepSize = 0.25f;
 float ssr_maxDistance = 30.0f;
 int   ssr_maxSteps = 90.0f;
 float ssr_hitThreshold = 0.133f;
-float ssr_reflectionStrength = 2.8f;
+float ssr_reflectionStrength = 1.0f;
 
-float sigmaS = 1.8f;
-float sigmaR = 2.0f;
+float sigmaS = 0.01f;
+float sigmaR = 0.01f;
 
 // Control Rain Wet Floor Effect
 size_t rain_shadow_index = 3;
@@ -935,7 +935,7 @@ int main(void) {
       * --------------------------------------------------------------------------------------------------------------------
       */
 
-    gammaManager.updateGamma(gamma);
+    gammaManager.updateGamma(view_gamma);
 
 
 
@@ -1459,13 +1459,13 @@ int main(void) {
             gammaManager.updateGamma(1.0f);
             glBindVertexArray(quadVAO);
             glDrawArrays(GL_TRIANGLES, 0, 6);
-            gammaManager.updateGamma(gamma);
+            gammaManager.updateGamma(view_gamma);
         }
         else {
             regular_screenShader.use();
             glBindVertexArray(quadVAO);
             glDrawArrays(GL_TRIANGLES, 0, 6);
-            gammaManager.updateGamma(gamma);
+            gammaManager.updateGamma(view_gamma);
         }
 
 

@@ -38,7 +38,7 @@ build
 .vscode
 
 # doxygen
-doxygen/generated
+Doxyfile
 
 # CMake
 CMakeUserPresets.json
