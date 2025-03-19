@@ -36,12 +36,16 @@ build
 
 # vscode
 .vscode
+.vsconan
 
 # doxygen
 Doxyfile
 
 # CMake
 CMakeUserPresets.json
+
+# Conan
+conanprofiles
 
 # exceptions
 !lib/**

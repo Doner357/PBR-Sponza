@@ -28,7 +28,7 @@ add_library(project_link_flags    INTERFACE)
 ##
 # @brief Enforce C++20 features for all targets that link against project_compile_flags.
 #
-target_compile_features(project_compile_flags INTERFACE cxx_std_20)
+target_compile_features(project_compile_flags INTERFACE cxx_std_23)
 
 ##
 # @brief Generator expressions to detect the compiler family for warning flags, etc.
@@ -69,8 +69,8 @@ target_compile_options(project_compile_flags
     $<$<AND:${real_gcc},$<BOOL:${STATIC_SYSTEM_LINK}>>:-static-libgcc -static-libstdc++>
     
     # MSVC static runtime for Debug/Release
-    $<$<AND:${msvc_like_cxx},$<BOOL:${STATIC_SYSTEM_LINK}>,$<CONFIG:Debug>>:/MTd>
-    $<$<AND:${msvc_like_cxx},$<BOOL:${STATIC_SYSTEM_LINK}>,$<CONFIG:Release>>:/MT>
+    #$<$<AND:${msvc_like_cxx},$<BOOL:${STATIC_SYSTEM_LINK}>,$<CONFIG:Debug>>:/MTd>
+    #$<$<AND:${msvc_like_cxx},$<BOOL:${STATIC_SYSTEM_LINK}>,$<CONFIG:Release>>:/MT>
 )
 
 target_compile_definitions(project_compile_flags
@@ -90,8 +90,8 @@ target_link_options(project_link_flags
     $<$<AND:${gcc_like_cxx},$<BOOL:${STATIC_SYSTEM_LINK}>>:-static>
 
     # MSVC static linking for Debug/Release
-    $<$<AND:${msvc_like_cxx},$<BOOL:${STATIC_SYSTEM_LINK}>,$<CONFIG:Debug>>:/MTd>
-    $<$<AND:${msvc_like_cxx},$<BOOL:${STATIC_SYSTEM_LINK}>,$<CONFIG:Release>>:/MT>
+    #$<$<AND:${msvc_like_cxx},$<BOOL:${STATIC_SYSTEM_LINK}>,$<CONFIG:Debug>>:/MTd>
+    #$<$<AND:${msvc_like_cxx},$<BOOL:${STATIC_SYSTEM_LINK}>,$<CONFIG:Release>>:/MT>
 )
 
 ##
@@ -132,30 +132,14 @@ add_custom_target(
     DEPENDS "${CMAKE_BINARY_DIR}/.copied_dir"
 )
 
-##
-# @brief Create an OBJECT library for appended sources like glad and stb_image_define.
-#
-add_library(
-    appended OBJECT
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/glad.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/stb_image_define.cpp"
-)
 
-target_include_directories(
-    appended
-    PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/include"
-)
-
-##
-# @brief Link both compile-time flags and link-time flags into the appended library.
-#
-target_link_libraries(
-    appended
-    PRIVATE
-    project_compile_flags
-    project_link_flags
-)
+# Fetch conan downloaded packages
+find_package(glad          REQUIRED)
+find_package(glfw3         REQUIRED)
+find_package(opengl_system REQUIRED)
+find_package(glm           REQUIRED)
+find_package(assimp        REQUIRED)
+find_package(stb           REQUIRED)
 
 ##
 # @brief Add subdirectory for imgui sources.
@@ -170,29 +154,23 @@ add_executable(
     "${CMAKE_CURRENT_SOURCE_DIR}/src/Source.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/learnopengl/custom_helper.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/learnopengl/ddsloader.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/stb_image_define.cpp"
 )
+
+#target_include_directories(
+#    ${CMAKE_PROJECT_NAME}
+#    PRIVATE
+#    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+#)
 
 target_include_directories(
     ${CMAKE_PROJECT_NAME}
     PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/include"
-)
-
-##
-# @brief Locate ASSIMP and GLFW libraries.
-#
-find_library(
-    ASSIMP_LIB
-    NAMES libassimp.dll assimp.dll
-    HINTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/assimp"
-    REQUIRED
-)
-
-find_library(
-    GLFW_LIB
-    NAMES libglfw3 glfw3
-    HINTS "${CMAKE_CURRENT_SOURCE_DIR}/lib/glfw"
-    REQUIRED
+    ${glad_INCLUDE_DIRS}
+    ${glfw3_INCLUDE_DIRS}
+    ${glm_INCLUDE_DIRS}
+    ${stb_INCLUDE_DIRS}
+    ${assimp_INCLUDE_DIRS}
 )
 
 ##
@@ -203,10 +181,8 @@ target_link_libraries(
     PRIVATE
     project_compile_flags
     project_link_flags
-    appended
     imgui
-    ${ASSIMP_LIB}
-    ${GLFW_LIB}
+    glad::glad glfw opengl::opengl glm::glm assimp::assimp stb::stb
 )
 
 ##

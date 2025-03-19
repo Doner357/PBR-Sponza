@@ -10,6 +10,7 @@
             "displayName": "Release Config",
             "description": "Release config type.",
             "binaryDir": "${sourceDir}/build/Release",
+            "toolchainFile": "${sourceDir}/build/generators/conan_toolchain.cmake",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE":"Release"
             }
@@ -19,6 +20,7 @@
             "displayName": "Debug Config",
             "description": "Debug config type.",
             "binaryDir": "${sourceDir}/build/Debug",
+            "toolchainFile": "${sourceDir}/build/generators/conan_toolchain.cmake",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE":"Debug"
             }
@@ -34,15 +36,18 @@
     "buildPresets": [
         {
             "name": "release",
-            "configurePreset": "default"
+            "configurePreset": "Release",
+            "configuration": "Release"
         },
         {
             "name": "debug",
-            "configurePreset": "default"
+            "configurePreset": "Debug",
+            "configuration": "Debug"
         },
         {
             "name": "default",
-            "configurePreset": "default"
+            "configurePreset": "default",
+            "configuration": "Release"
         }
     ]
 }

@@ -27,5 +27,5 @@ target_link_libraries(
 target_include_directories(
     imgui
     PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/../../include"
+    ${glfw3_INCLUDE_DIRS}
 )

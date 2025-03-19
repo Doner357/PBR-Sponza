@@ -1,7 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <stb/stb_image.h>
+#include <stb_image.h>
 
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -162,7 +163,7 @@ float ssao_sample_bias   = 0.0f;
 bool  applySsr = true;
 float ssr_stepSize = 0.25f;
 float ssr_maxDistance = 30.0f;
-int   ssr_maxSteps = 90.0f;
+int   ssr_maxSteps = 90;
 float ssr_hitThreshold = 0.133f;
 float ssr_reflectionStrength = 1.0f;
 
@@ -418,8 +419,6 @@ int main(void) {
       * Texture loading
       * --------------------------------------------------------------------------------------------------------------------
       */
-
-    PbrTextures pbr_textures;
 
 
 
@@ -1443,7 +1442,7 @@ int main(void) {
             float real_luminance = 0.2126f * average_color.r + 0.7152 * average_color.g + 0.0722 * average_color.b;
 
             // Calculate adapted luminance
-            float adapted_luminance = last_luminance + (real_luminance - last_luminance) * (1.0 - std::pow(0.98f, kExposureAdjustSpeed * (1.0f / fps)));
+            float adapted_luminance = static_cast<float>(last_luminance + (real_luminance - last_luminance) * (1.0 - std::pow(0.98f, kExposureAdjustSpeed * (1.0f / fps))));
             // Clamp the luminance
             adapted_luminance = std::clamp(adapted_luminance, kMinLuminance, kMaxLuminance);
             adapted_luminance = std::max(adapted_luminance, 0.0001f);
