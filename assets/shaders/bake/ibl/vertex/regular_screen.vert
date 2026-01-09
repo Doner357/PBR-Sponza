@@ -1,4 +1,4 @@
-#version 460 core
+#version 410 core
 layout (location = 0) in vec2 aPos;
 layout (location = 2) in vec2 aTexCoords;
 

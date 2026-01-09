@@ -1,4 +1,4 @@
-#version 460 core
+#version 410 core
 layout (triangles) in;
 layout (line_strip, max_vertices = 6) out;		// Since one triangle has three points, to generate line for each point, there are six points needed
 in VS_OUT {

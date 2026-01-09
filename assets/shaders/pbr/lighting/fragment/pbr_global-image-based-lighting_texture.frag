@@ -1,4 +1,4 @@
-#version 460 core
+#version 410 core
 
 in VS_OUT {
 	vec3 fragPos;
@@ -489,7 +489,7 @@ float PointLightShadowCalculation(PointLight light, vec3 fragPos, vec3 normal, i
 		vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
 	);
 	for (int i = 0; i < samples; i++) {
-		shadow += texture(shadowMaps.pointLights, vec4(fragToLight + sampleOffsetDirections[i] * diskRadius, float(shadow_id)), currentDepth / shadowPointLight_far_planes[shadow_id] - bias).r;
+		shadow += texture(shadowMaps.pointLights, vec4(fragToLight + sampleOffsetDirections[i] * diskRadius, float(shadow_id)), currentDepth / shadowPointLight_far_planes[shadow_id] - bias);
 	}
 	shadow /= float(samples);
 

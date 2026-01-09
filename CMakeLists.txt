@@ -86,8 +86,8 @@ target_compile_definitions(project_compile_flags
 #
 target_link_options(project_link_flags
     INTERFACE
-    # GCC/Clang static linking (Clang generally accepts -static, so no warning here)
-    $<$<AND:${gcc_like_cxx},$<BOOL:${STATIC_SYSTEM_LINK}>>:-static>
+    # GCC static linking (only for real GCC, not Clang/AppleClang - macOS doesn't support -static)
+    $<$<AND:${real_gcc},$<BOOL:${STATIC_SYSTEM_LINK}>>:-static>
 
     # MSVC static linking for Debug/Release
     #$<$<AND:${msvc_like_cxx},$<BOOL:${STATIC_SYSTEM_LINK}>,$<CONFIG:Debug>>:/MTd>

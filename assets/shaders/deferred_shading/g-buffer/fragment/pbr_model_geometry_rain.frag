@@ -1,4 +1,4 @@
-#version 460 core
+#version 410 core
 
 layout (location = 0) out vec3 gAlbedo;
 layout (location = 1) out vec3 gNormal;

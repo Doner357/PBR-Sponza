@@ -50,3 +50,4 @@ conanprofiles
 # exceptions
 !lib/**
 !assets/**
+.DS_Store

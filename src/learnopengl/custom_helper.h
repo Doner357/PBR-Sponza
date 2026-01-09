@@ -1287,6 +1287,10 @@ namespace CustomHelper {
             }
             lastPointLightParams[index] = newParam;
 
+            // Always update the light manager (for rendering light spheres)
+            lightManager.updatePointLight(light, index);
+            farPlaneManager.updateFarPlane(far_plane, index);
+
             glBindFramebuffer(GL_FRAMEBUFFER, this->framebuffer);
             glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->point_depthMaps, 0);
 
@@ -1304,23 +1308,33 @@ namespace CustomHelper {
                     lightProjection * glm::lookAt(lightPos, lightPos + glm::vec3( 0.0f,  0.0f, -1.0f), glm::vec3(0.0f, -1.0f,  0.0f)),
                 };
 
-                lightManager.updatePointLight(light, index);
-                farPlaneManager.updateFarPlane(far_plane, index);
-
                 glViewport(0, 0, this->pointMapResolution, this->pointMapResolution);
 
+                // Clear depth texture - use glClearTexSubImage if available, otherwise skip
+                // (macOS Metal backend may not support this)
+#ifndef __APPLE__
                 float clear_value = 1.0f;
                 glClearTexSubImage(
-                    this->point_depthMaps, 
-                    0, 0, 0, 
+                    this->point_depthMaps,
+                    0, 0, 0,
                     6 * index, // offset in the 3D layer
-                    pointMapResolution, 
-                    pointMapResolution, 
-                    6, 
-                    GL_DEPTH_COMPONENT, 
-                    GL_FLOAT, 
+                    pointMapResolution,
+                    pointMapResolution,
+                    6,
+                    GL_DEPTH_COMPONENT,
+                    GL_FLOAT,
                     &clear_value
                 );
+#else
+                // On macOS, clear each face individually using traditional method
+                for (unsigned int face = 0; face < 6; face++) {
+                    glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT,
+                                              this->point_depthMaps, 0, 6 * index + face);
+                    glClear(GL_DEPTH_BUFFER_BIT);
+                }
+                // Reattach full texture
+                glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, this->point_depthMaps, 0);
+#endif
 
                 this->cube_bake_shader.use();
                 for (unsigned int i = 0; i < 6; i++) {

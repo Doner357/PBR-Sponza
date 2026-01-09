@@ -191,9 +191,9 @@ GLuint texture_loadDDS(const std::string path, const std::string &directory, boo
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     GLfloat value, max_anisotropy = 8.0f; /* don't exceed this value...*/
-    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, & value);
+    glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, & value);
     value = (value > max_anisotropy) ? max_anisotropy : value;
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, value);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, value);
 
     // Upload mipmap levels
     unsigned int offset = 0;

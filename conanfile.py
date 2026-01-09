@@ -19,7 +19,7 @@ class CompressorRecipe(ConanFile):
         
     def configure(self):
         self.options["glad"].spec = "gl"
-        self.options["glad"].extensions = "GL_EXT_texture_compression_s3tc,GL_EXT_texture_sRGB"
+        self.options["glad"].extensions = "GL_EXT_texture_compression_s3tc,GL_EXT_texture_sRGB,GL_ARB_texture_storage,GL_ARB_clear_texture,GL_EXT_texture_filter_anisotropic,GL_ARB_texture_cube_map_array"
         self.options["glad"].gl_profile = "core"
-        self.options["glad"].gl_version = "4.6"
+        self.options["glad"].gl_version = "4.1"
         

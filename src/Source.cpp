@@ -21,6 +21,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <cstring>
 #include <cmath>
 #include <functional>
 #include <random>
@@ -36,9 +37,20 @@ unsigned int LoadTexture(char const *path, bool gammaCorrection, bool flip_verti
 unsigned int LoadCubemap(std::vector<std::string> faces, bool gammaCorrection, bool flip_vertically = false);
 unsigned int CreateColorFramebuffer(const size_t numOfColorAttachment, unsigned int *frameColortextures, const unsigned int width, const unsigned int height, const bool multisample, const unsigned int samples, const unsigned int hdr);
 
-// Screen Width and Height setting
-const unsigned int SCR_WIDTH = 2560;
-const unsigned int SCR_HEIGHT = 1440;
+// Window size (for ImGui and mouse input)
+// On Retina displays, framebuffer will be 2x this size
+// Using 1120x630 -> framebuffer 2240x1260 on Retina
+const unsigned int WINDOW_WIDTH = 1120;
+const unsigned int WINDOW_HEIGHT = 630;
+
+// Framebuffer size (for OpenGL rendering - may be 2x on Retina displays)
+// NOTE: Reduced resolution for macOS compatibility (was 2560x1440)
+unsigned int SCR_WIDTH = 1600;
+unsigned int SCR_HEIGHT = 900;
+
+// Content scale for Retina displays
+float contentScaleX = 1.0f;
+float contentScaleY = 1.0f;
 
 // Gamma value
 // This time we do gamma correction in screen post-processing shader
@@ -191,12 +203,27 @@ int main(void) {
     * --------------------------------------------------------------------------------------------------------------------
     */
 
-    // Initialize the glfw
-    glfwInit();
+    // Set error callback for debugging (must be before glfwInit)
+    glfwSetErrorCallback([](int error, const char* description) {
+        std::cerr << "GLFW Error " << error << ": " << description << std::endl;
+    });
 
-    // Tell the glfw what version of opengl do we want to use, this time we use version 3.3
+    // Initialize the glfw
+    if (!glfwInit()) {
+        std::cerr << "Failed to initialize GLFW" << std::endl;
+        return -1;
+    }
+    std::cout << "GLFW initialized successfully" << std::endl;
+
+    // Tell the glfw what version of opengl do we want to use
+#ifdef __APPLE__
+    // macOS only supports OpenGL up to 4.1
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+#else
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+#endif
 
     // Tell glfw what kind of profile we want to use, this time is core profile
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -220,15 +247,29 @@ int main(void) {
     * --------------------------------------------------------------------------------------------------------------------
     */
 
-    GLFWwindow *window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "PBR Sponza", NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "PBR Sponza", NULL, NULL);
 
     // Check if the window open successfully
     if (window == NULL) {
-        std::cout << "Failed to create GLFW window" << std::endl;
+        std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return -1;
     }
+    std::cout << "Window created successfully" << std::endl;
     glfwMakeContextCurrent(window);
+
+    // Get actual framebuffer size (important for Retina/HiDPI displays)
+    int fb_width, fb_height;
+    glfwGetFramebufferSize(window, &fb_width, &fb_height);
+    SCR_WIDTH = static_cast<unsigned int>(fb_width);
+    SCR_HEIGHT = static_cast<unsigned int>(fb_height);
+
+    // Calculate content scale for Retina displays
+    contentScaleX = static_cast<float>(SCR_WIDTH) / static_cast<float>(WINDOW_WIDTH);
+    contentScaleY = static_cast<float>(SCR_HEIGHT) / static_cast<float>(WINDOW_HEIGHT);
+    std::cout << "Window size: " << WINDOW_WIDTH << "x" << WINDOW_HEIGHT << std::endl;
+    std::cout << "Framebuffer size: " << SCR_WIDTH << "x" << SCR_HEIGHT << std::endl;
+    std::cout << "Content scale: " << contentScaleX << "x" << contentScaleY << std::endl;
 
     // Register the call back function
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
@@ -247,9 +288,25 @@ int main(void) {
     */
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-        std::cout << "Failed to initialize GLAD" << std::endl;
+        std::cerr << "Failed to initialize GLAD" << std::endl;
         return -1;
     }
+    std::cout << "GLAD loaded successfully" << std::endl;
+    std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+    std::cout << "OpenGL Renderer: " << glGetString(GL_RENDERER) << std::endl;
+
+    // Check for required extensions
+    GLint numExtensions;
+    glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+    bool hasCubeMapArray = false;
+    for (GLint i = 0; i < numExtensions; i++) {
+        const char* ext = (const char*)glGetStringi(GL_EXTENSIONS, i);
+        if (strcmp(ext, "GL_ARB_texture_cube_map_array") == 0) {
+            hasCubeMapArray = true;
+            break;
+        }
+    }
+    std::cout << "GL_ARB_texture_cube_map_array: " << (hasCubeMapArray ? "supported" : "NOT supported") << std::endl;
 
 
 
@@ -259,25 +316,34 @@ int main(void) {
     */
 
     // Setup Dear ImGui context
+    std::cout << "Initializing ImGui..." << std::endl;
     IMGUI_CHECKVERSION();
+    std::cout << "Creating ImGui context..." << std::endl;
     ImGui::CreateContext();
+    std::cout << "Getting ImGuiIO..." << std::endl;
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-    // Somewhere in your initialization code
-    // Load a font (.ttf) with desired pixel size, for example 20.0f
-    io.Fonts->AddFontFromFileTTF("fonts/Play-Regular.ttf", 20.0f);
+
+    // Load font (ImGui handles Retina scaling internally)
+    std::cout << "Loading font..." << std::endl;
+    io.Fonts->AddFontFromFileTTF("fonts/Play-Regular.ttf", 18.0f);
+    std::cout << "Font loaded" << std::endl;
 
     // Setup Dear ImGui style
     ImGui::StyleColorsDark();
     //ImGui::StyleColorsLight();
 
     // Setup Platform/Renderer backends
+    std::cout << "ImGui_ImplGlfw_InitForOpenGL..." << std::endl;
     ImGui_ImplGlfw_InitForOpenGL(window, true);
 #ifdef __EMSCRIPTEN__
     ImGui_ImplGlfw_InstallEmscriptenCallbacks(window, "#canvas");
 #endif
-    ImGui_ImplOpenGL3_Init("#version 330");
+    std::cout << "ImGui_ImplOpenGL3_Init..." << std::endl;
+    ImGui_ImplOpenGL3_Init("#version 410");
+    std::cout << "ImGui initialized successfully" << std::endl;
+    std::cout.flush();
 
 
 
@@ -286,6 +352,8 @@ int main(void) {
     * OpenGL: Congifure OpenGL global state
     * --------------------------------------------------------------------------------------------------------------------
     */
+    std::cout << "Configuring OpenGL state..." << std::endl;
+    std::cout.flush();
 
     // Enable multisampling
     /*
@@ -388,14 +456,20 @@ int main(void) {
      * Model loading
      * --------------------------------------------------------------------------------------------------------------------
      */
+    std::cout << "Loading models..." << std::endl;
+    std::cout.flush();
 
     PbrModel pbr_sponza("models/sponza_pbr/sponza.obj", true, true);
+    std::cout << "Model loaded successfully" << std::endl;
+    std::cout.flush();
     //PbrModel gun("models/Cerberus_by_Andrew_Maximov/Cerberus_LP.FBX", false, true);
 
      /*
      * Set up vertex data (and buffer(s)) and configure vertex attributes
      * --------------------------------------------------------------------------------------------------------------------
      */
+    std::cout << "Setting up VAO..." << std::endl;
+    std::cout.flush();
     CustomHelper::VAOManager vaoManager;
     unsigned int cubemapVAO = vaoManager.getVAO(CustomHelper::VAO_SKYBOX);
     unsigned int quadVAO = vaoManager.getVAO(CustomHelper::VAO_QUAD);
@@ -439,6 +513,8 @@ int main(void) {
     };
 
     unsigned int skyboxTexture = LoadCubemap(faces, true);
+    std::cout << "Cubemap loaded" << std::endl;
+    std::cout.flush();
 
 
 
@@ -446,6 +522,8 @@ int main(void) {
     * Build and compile shader program
     * --------------------------------------------------------------------------------------------------------------------
     */
+    std::cout << "Loading shaders..." << std::endl;
+    std::cout.flush();
 
     Shader screenShader("shaders/post-processing/vertex/regular_screen.vert", "shaders/post-processing/fragment/regular_screen.frag");
     Shader skyboxShader("shaders/others/vertex/skybox.vert", "shaders/others/fragment/skybox.frag");
@@ -501,23 +579,28 @@ int main(void) {
     Shader pbrIblColorShader("shaders/pbr/lighting/vertex/regular.vert", "shaders/pbr/lighting/fragment/pbr_global-image-based-lighting_color.frag");
     Shader pbrIblTextureShader("shaders/pbr/lighting/vertex/height_mapping.vert", "shaders/pbr/lighting/fragment/pbr_global-image-based-lighting_texture.frag");
 
-
+    std::cout << "Shaders loaded" << std::endl;
+    std::cout.flush();
 
     /*
      * Uniform value setting
      * --------------------------------------------------------------------------------------------------------------------
      */
+    std::cout << "Setting uniforms..." << std::endl;
+    std::cout.flush();
 
+    std::cout << "  skyboxShader..." << std::endl; std::cout.flush();
     skyboxShader.use();
     skyboxShader.setInt("cubemap", 0);
 
-
+    std::cout << "  screenShader..." << std::endl; std::cout.flush();
     screenShader.use();
     screenShader.setInt("screenTexture", 0);
 
-
+    std::cout << "  regular_screenShader..." << std::endl; std::cout.flush();
     regular_screenShader.use();
     regular_screenShader.setInt("screenTexture", 0);
+    std::cout << "  hdr_attenuation_screenShader..." << std::endl; std::cout.flush();
 
     hdr_attenuation_screenShader.use();
     hdr_attenuation_screenShader.setInt("screenTexture", 0);
@@ -654,15 +737,20 @@ int main(void) {
 
     glUseProgram(0);
 
-
+    std::cout << "Shader uniforms set" << std::endl;
+    std::cout.flush();
 
     /*
      * Uniform Block Object setting
      * --------------------------------------------------------------------------------------------------------------------
      */
+    std::cout << "Setting up UBO..." << std::endl;
+    std::cout.flush();
 
      // Camera matrices uniform block
+    std::cout << "  Creating CameraMatricesManager..." << std::endl; std::cout.flush();
     CustomHelper::CameraMatricesManager cameraMatManager(CustomHelper::UBOPOINT_NAME_CAMERA_MATRICES, CustomHelper::UBOPOINT_CAMERA_MATRICES);
+    std::cout << "  CameraMatricesManager created" << std::endl; std::cout.flush();
     cameraMatManager.registerShader(skyboxShader);
     cameraMatManager.registerShader(lightCubeShader);
     cameraMatManager.registerShader(textureShader);
@@ -674,12 +762,15 @@ int main(void) {
     cameraMatManager.registerShader(gbufferRainShader);
 
     // Global light uniform block
+    std::cout << "  Creating GlobalLightManager..." << std::endl; std::cout.flush();
     CustomHelper::GlobalBlinnPongLightManager globalLightManager(CustomHelper::UBOPOINT_NAME_BLINPHONG_LIGHTING, CustomHelper::UBOPOINT_BLINPHONG_LIGHTING, CustomHelper::MAX_NUM_DIRECTIONALLIGHT, CustomHelper::MAX_NUM_POINTLIGHT, CustomHelper::MAX_NUM_SPOTLIGHT);
     globalLightManager.registerShader(textureShader);
     //globalLightManager.registerShader(pbrIblTextureShader);
     globalLightManager.registerShader(pbrIblColorShader);
+    std::cout << "  GlobalLightManager created" << std::endl; std::cout.flush();
 
     // Global light with shadow uniform block
+    std::cout << "  Creating GlobalShadowLightManager..." << std::endl; std::cout.flush();
     CustomHelper::GlobalBlinnPongShadowLightManager globalShadowLightManager(
         CustomHelper::UBOPOINT_NAME_BLINPHONG_SHADOWLIGHTING,
         CustomHelper::UBOPOINT_NAME_BLINPHONG_SHADOWMATRICES,
@@ -694,12 +785,15 @@ int main(void) {
         512,
         1024
     );
+    std::cout << "  GlobalShadowLightManager created" << std::endl; std::cout.flush();
     globalShadowLightManager.registerShader(pbrIblTextureShader);
     globalShadowLightManager.registerShader(deferredShadingShader);
     globalShadowLightManager.registerShader(gbufferRainShader);
 
     // Gamma Correction uniform block
+    std::cout << "  Creating GammaManager..." << std::endl; std::cout.flush();
     CustomHelper::GammaManager gammaManager(CustomHelper::UBOPOINT_NAME_GAMMA_CORRECTION, CustomHelper::UBOPOINT_GAMMA_CORRECTION);
+    std::cout << "  GammaManager created" << std::endl; std::cout.flush();
     // Move gamma correction to post-processing part
     gammaManager.registerShader(hdr_gamma_correction_screenShader);
     gammaManager.registerShader(hdr_reinhard_screenShader);
@@ -707,6 +801,7 @@ int main(void) {
     gammaManager.registerShader(hdr_aces_screenShader);
     gammaManager.registerShader(hdr_agx_screenShader);
     gammaManager.registerShader(hdr_agx_punchy_screenShader);
+    std::cout << "UBO setup complete" << std::endl; std::cout.flush();
 
 
 
@@ -714,10 +809,17 @@ int main(void) {
     * Frambuffers creations
     * --------------------------------------------------------------------------------------------------------------------
     */
+    std::cout << "Creating framebuffers..." << std::endl;
+
     // Multisample framebuffer for render first scene
     // Disable MSAA since we're using deferred shading
     unsigned int hdr_ms_render_screen_texture;
+#ifdef __APPLE__
+    // macOS has issues with multisampled HDR framebuffers, disable MSAA
+    unsigned int hdr_ms_render_screen_framebuffer = CreateColorFramebuffer(1, &hdr_ms_render_screen_texture, SCR_WIDTH, SCR_HEIGHT, false, 0, 1);
+#else
     unsigned int hdr_ms_render_screen_framebuffer = CreateColorFramebuffer(1, &hdr_ms_render_screen_texture, SCR_WIDTH, SCR_HEIGHT, true, 8, 1);
+#endif
 
     // Framebuffer for deferred shading
     unsigned int hdr_deferred_shading_screen_texture;
@@ -751,7 +853,7 @@ int main(void) {
     unsigned int hdr_tone_mapping_screen_texture;
     unsigned int hdr_tone_mapping_screen_framebuffer = CreateColorFramebuffer(1, &hdr_tone_mapping_screen_texture, SCR_WIDTH, SCR_HEIGHT, false, 0, 1);
 
-    // Framebuffer for storing image after post-processing 
+    // Framebuffer for storing image after post-processing
     unsigned int hdr_process_screen_texture;
     unsigned int hdr_process_screen_framebuffer = CreateColorFramebuffer(1, &hdr_process_screen_texture, SCR_WIDTH, SCR_HEIGHT, false, 0, 1);
 
@@ -765,10 +867,12 @@ int main(void) {
     for (int i = 0; i < 2; i++) {
         pingpong_framebuffer[i] = CreateColorFramebuffer(1, &pingpong_textures[i], SCR_WIDTH, SCR_HEIGHT, false, 0, 1);
     }
+    std::cout << "  Framebuffers created" << std::endl;
 
 
 	// ** Deferred shading **
 	// G-buffer creation
+    std::cout << "Creating G-buffers..." << std::endl;
     std::vector<unsigned int> gbuffer_textures;
 	unsigned int gbuffer;
     gbuffer = createGBuffer(SCR_WIDTH, SCR_HEIGHT, gbuffer_textures);
@@ -791,8 +895,9 @@ int main(void) {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssao_color_texture, 0);
 
 	// Check whether the framebuffer is complete
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+	GLenum ssao_fb_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (ssao_fb_status != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: SSAO Framebuffer is not complete! Status: " << ssao_fb_status << std::endl;
 
     // Framebuffer for ambient occlusion blur
 	unsigned int ssao_blur_framebuffer;
@@ -808,9 +913,10 @@ int main(void) {
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssao_blur_color_texture, 0);
 
 	// Check whether the framebuffer is complete
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
-
+	GLenum ssao_blur_fb_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+	if (ssao_blur_fb_status != GL_FRAMEBUFFER_COMPLETE)
+		std::cout << "ERROR::FRAMEBUFFER:: SSAO Blur Framebuffer is not complete! Status: " << ssao_blur_fb_status << std::endl;
+    std::cout << "  G-buffers and SSAO framebuffers created" << std::endl;
 
     BloomRenderer hdr_physic_bloom_renderer(quadVAO);
     hdr_physic_bloom_renderer.init(SCR_WIDTH, SCR_HEIGHT);
@@ -823,10 +929,12 @@ int main(void) {
      */
 
      // Generate IBL textures
+    std::cout << "Baking IBL textures..." << std::endl;
     //ibl_textures_set.push_back(BakeIblTex("textures/hdr/sponza.hdr", cubemapVAO, quadVAO));
     ibl_textures_set.push_back(BakeIblTex("textures/hdr/evening_road_01_puresky_1k.hdr", cubemapVAO, quadVAO));
     ibl_textures_set.push_back(BakeIblTex("textures/hdr/overcast_soil_puresky_2k.hdr", cubemapVAO, quadVAO));
     ibl_textures_set.push_back(BakeIblTex("textures/black.jpg", cubemapVAO, quadVAO));
+    std::cout << "  IBL textures baked" << std::endl;
 
 
 
@@ -920,7 +1028,16 @@ int main(void) {
      * --------------------------------------------------------------------------------------------------------------------
      */
 
-
+    // Initialize a demo point light so light spheres are visible
+    // Camera starts at (0, 1, 3), so put light in front of camera view
+    point_lights[0].activate = GL_TRUE;
+    point_lights[0].position = glm::vec3(0.0f, 1.5f, 0.0f);
+    point_lights[0].constant = 0.0f;
+    point_lights[0].linear = 0.0f;
+    point_lights[0].quadratic = 1.0f;
+    point_lights[0].ambient = glm::vec3(0.02f);
+    point_lights[0].diffuse = glm::vec3(5.0f, 4.5f, 4.0f);
+    point_lights[0].specular = glm::vec3(10.0f, 9.0f, 8.0f);
 
     /*
      * Local Light setting
@@ -952,6 +1069,9 @@ int main(void) {
      * Render loop
      * --------------------------------------------------------------------------------------------------------------------
      */
+
+    std::cout << "=== Initialization complete ===" << std::endl; std::cout.flush();
+    std::cout << "Entering render loop..." << std::endl; std::cout.flush();
 
      /* Disable v-sync */
      //glfwSwapInterval(0);
@@ -1278,8 +1398,13 @@ int main(void) {
 		glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
         // Draw light cube
-        CustomHelper::DrawGlobalPointLightSphere(globalShadowLightManager.getLightManager(), sphereVAO, sphere_index_count, lightCubeShader, 0.025f);
-        CustomHelper::DrawGlobalSpotLightCube(globalShadowLightManager.getLightManager(), cubeVAO, lightCubeShader, 0.025f);
+        // Bind the correct framebuffer for forward rendering
+        glBindFramebuffer(GL_FRAMEBUFFER, hdr_ssr_screen_blend_framebuffer);
+        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+
+        // Draw light spheres and cubes with larger scale for visibility
+        CustomHelper::DrawGlobalPointLightSphere(globalShadowLightManager.getLightManager(), sphereVAO, sphere_index_count, lightCubeShader, 0.15f);
+        CustomHelper::DrawGlobalSpotLightCube(globalShadowLightManager.getLightManager(), cubeVAO, lightCubeShader, 0.15f);
 
 
 
@@ -1942,9 +2067,9 @@ unsigned int LoadTexture(char const *path, bool gammaCorrection, bool flip_verti
 
         // Anisotropy
         GLfloat value, max_anisotropy = 8.0f; /* don't exceed this value...*/
-        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY, & value);
+        glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, & value);
         value = (value > max_anisotropy) ? max_anisotropy : value;
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, value);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, value);
 
         glBindTexture(GL_TEXTURE_2D, 0);
         stbi_image_free(data);
@@ -2043,13 +2168,15 @@ unsigned int CreateColorFramebuffer(const size_t numOfColorAttachment, unsigned 
         break;
     }
     GLenum texture_data_type = (hdr) ? GL_FLOAT : GL_UNSIGNED_BYTE;
+    // Use GL_RGB format for RGB internal formats
+    GLenum texture_format = GL_RGB;
 
     for (unsigned int i = 0; i < numOfColorAttachment; i++) {
         glBindTexture(texformat, frameColortextures[i]);
         if (multisample)
             glTexImage2DMultisample(texformat, samples, texture_color_format, width, height, GL_TRUE);
         else {
-            glTexImage2D(texformat, 0, texture_color_format, width, height, 0, GL_RGBA, texture_data_type, NULL);
+            glTexImage2D(texformat, 0, texture_color_format, width, height, 0, texture_format, texture_data_type, NULL);
             glTexParameteri(texformat, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(texformat, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(texformat, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -2088,8 +2215,10 @@ unsigned int CreateColorFramebuffer(const size_t numOfColorAttachment, unsigned 
 
 
     // Check whether the framebuffer is complete
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+    GLenum color_fb_status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (color_fb_status != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: Color Framebuffer is not complete! Status: " << color_fb_status
+                  << " (multisample=" << multisample << ", hdr=" << hdr << ", w=" << width << ", h=" << height << ")" << std::endl;
 
     // Bind framebuffer to default
     glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -1,4 +1,4 @@
-#version 460 core
+#version 410 core
 in vec4 FragPos;
 
 in vec2 gtexCoords;
