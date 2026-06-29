@@ -45,6 +45,7 @@ Doxyfile
 CMakeUserPresets.json
 
 # Conan
+conanfile/
 conanprofiles
 
 # exceptions
